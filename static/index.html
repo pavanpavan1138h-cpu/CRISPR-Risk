@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CRISPR Biosafety Risk Assessor</title>
+    <link rel="stylesheet" href="style.css">
+    <!-- Chart.js for Visualization -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+
+<body>
+    <header>
+        <nav class="nav-bar">
+            <div class="logo">🧬 CRISPR-Risk</div>
+            <div class="nav-links">
+                <a href="#" onclick="navigateTo('home')" class="nav-link active">Home</a>
+                <a href="#" onclick="navigateTo('about')" class="nav-link">About</a>
+                <a href="#" onclick="navigateTo('results')" id="nav-results" class="nav-link hidden">Results</a>
+            </div>
+        </nav>
+    </header>
+
+    <div class="container">
+
+        <main>
+            <!-- 1. HOME / HERO SECTION -->
+            <section id="home-section" class="fade-in">
+                <div class="hero-content">
+                    <h1>Off-Target Prediction & <br> Biosafety Assessment</h1>
+                    <p class="subtitle">Advanced AI-driven analysis for safer CRISPR-Cas9 gene editing experiments.</p>
+
+                    <div class="glass-panel input-section">
+                        <div class="input-wrapper">
+                            <input type="text" id="grna-input" placeholder="ENTER gRNA SEQUENCE (18-25NT)"
+                                maxlength="25">
+                        </div>
+                        <div class="hint">Supports 18-25 nucleotides (A, T, G, C)</div>
+                        <br>
+                        <button id="predict-btn" class="primary-btn" onclick="predictRisk()">Analyze Safety</button>
+                        <div id="error-msg" class="error-msg hidden"></div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 2. ABOUT SECTION -->
+            <section id="about-section" class="hidden fade-in">
+                <div class="glass-panel about-panel">
+                    <h2 class="section-title">About the Project</h2>
+                    <p><strong>CRISPR-Risk</strong> is an advanced bioinformatics platform built to address one of the
+                        critical challenges in gene editing: <strong>Biosafety</strong>. While CRISPR-Cas9 is a powerful
+                        tool, inadvertent edits at off-target genomic sites can lead to unintended consequences. This
+                        tool predicts these risks to ensure safer experimental designs.</p>
+
+                    <h3>Methodology</h3>
+                    <p>Our approach combines machine learning with biological context to provide a holistic risk
+                        assessment:</p>
+                    <ul class="feature-list">
+                        <li><strong>Off-Target Prediction:</strong> We utilize a Random Forest Classifier trained on
+                            extensive synthetic datasets. The model analyzes sequence homology to identify potential
+                            off-target sites where the Cas9 nuclease might mistakenly cut.</li>
+                        <li><strong>Biosafety Risk Score (BRS):</strong> A novel scoring metric that goes beyond simple
+                            probability. The BRS integrates multiple biological factors to weigh the <em>impact</em> of
+                            an off-target edit:
+                            <br><br>
+                            <code class="formula">BRS = P × (0.3E + 0.2C + 0.2F + 0.1D + 0.2H)</code>
+                            <br><br>
+                            Where:
+                            <ul>
+                                <li><strong>P (Probability):</strong> likelihood of cleavage at the specific site.</li>
+                                <li><strong>E (Essentiality):</strong> Is the gene critical for cell survival?</li>
+                                <li><strong>C (Chromatin):</strong> Is the DNA accessible (open chromatin) vs. tightly
+                                    packed?</li>
+                                <li><strong>F (Function):</strong> Does the cut occur in a coding region (Exon) or
+                                    non-coding (Intron)?</li>
+                                <li><strong>D (Distance):</strong> Proximity to the Transcription Start Site (TSS).</li>
+                                <li><strong>H (Disease):</strong> Is the gene associated with known diseases?</li>
+                            </ul>
+                        </li>
+                    </ul>
+
+                    <h3>Future Roadmap</h3>
+                    <p>We aim to integrate real-time genomic databases (like Ensembl) and expand support for other Cas
+                        variants (Cas12a, Cas13) to make this a universal tool for gene editors.</p>
+
+                    <h3>Tech Stack</h3>
+                    <div class="tech-stack">
+                        <span class="tech-tag">Python (FastAPI)</span>
+                        <span class="tech-tag">Scikit-Learn (Random Forest)</span>
+                        <span class="tech-tag">BioPython</span>
+                        <span class="tech-tag">Chart.js (Data Vis)</span>
+                        <span class="tech-tag">Glassmorphism UI</span>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 3. LOADING -->
+            <div id="loading" class="hidden">
+                <div class="loader"></div>
+                <p>Running Bio-Risk Algorithm...</p>
+            </div>
+
+            <!-- 4. RESULTS SECTION -->
+            <section id="results-section" class="hidden fade-in">
+                <div class="results-header">
+                    <h2 class="section-title">Analysis Report</h2>
+                    <button class="back-btn" onclick="navigateTo('home')">← New Analysis</button>
+                </div>
+
+                <div class="dashboard-grid">
+                    <!-- 1. Summary Card -->
+                    <div class="glass-panel summary-card">
+                        <h3>Max Risk Score</h3>
+                        <div class="score-display" id="top-score">0.00</div>
+                        <div class="risk-badge" id="top-risk-class">Low</div>
+                    </div>
+
+                    <!-- 2. Risk Distribution (Doughnut) -->
+                    <div class="glass-panel chart-card">
+                        <h3>Risk Distribution</h3>
+                        <canvas id="riskChart"></canvas>
+                    </div>
+
+                    <!-- 3. Mismatch Distribution (Bar) -->
+                    <div class="glass-panel chart-card">
+                        <h3>Mismatch Count</h3>
+                        <canvas id="mismatchChart"></canvas>
+                    </div>
+
+                    <!-- 4. Biological Profile (Radar) -->
+                    <div class="glass-panel chart-card">
+                        <h3>Bio-Feature Profile</h3>
+                        <canvas id="radarChart"></canvas>
+                    </div>
+                </div>
+
+                <h3 class="section-title">Off-Target Candidates</h3>
+                <div class="glass-panel table-wrapper">
+                    <table id="results-table">
+                        <thead>
+                            <tr>
+                                <th>Sequence</th>
+                                <th>Mismatches</th>
+                                <th>Off-Target Prob</th>
+                                <th>Risk Score (BRS)</th>
+                                <th>Gene Essentiality</th>
+                                <th>Region</th>
+                                <th>Risk Class</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Rows will be injected here -->
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+        </main>
+
+        <footer>
+            <p>CRISPR Biosafety Risk Assessor | Academic Research Demo</p>
+        </footer>
+    </div>
+    <script src="script.js"></script>
+</body>
+
+</html>
