@@ -81,10 +81,10 @@ function renderFeatureRadar(results) {
 
     if (topRisky.length > 0) {
         topRisky.forEach(r => {
-            avgE += r.features.gene_essentiality;
-            avgC += r.features.chromatin_accessibility;
-            avgD += r.features.tss_proximity;
-            avgH += r.features.disease_involvement;
+            avgE += r.genomic_context.gene_essentiality;
+            avgC += r.genomic_context.chromatin_accessibility;
+            avgD += r.genomic_context.tss_proximity;
+            avgH += r.genomic_context.disease_involvement;
         });
         avgE /= topRisky.length;
         avgC /= topRisky.length;
@@ -257,8 +257,8 @@ function displayResults(results) {
             <td>${item.mismatches}</td>
             <td>${item.off_target_prob.toFixed(4)}</td>
             <td><strong>${item.brs_score.toFixed(4)}</strong></td>
-            <td>${item.features.gene_essentiality}</td>
-            <td>${item.features.functional_region}</td>
+            <td>${item.genomic_context.gene_essentiality}</td>
+            <td>${item.genomic_context.region_type}</td>
             <td><span class="risk-badge risk-${item.risk_class.toLowerCase()}">${item.risk_class}</span></td>
         `;
         tableBody.appendChild(row);
