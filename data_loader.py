@@ -2,9 +2,12 @@ import pandas as pd
 import os
 import numpy as np
 
+from dataset_manager import DatasetManager
+
 class DataLoader:
     def __init__(self, data_dir="data"):
         self.data_dir = data_dir
+        self.manager = DatasetManager(data_dir)
         
     def load_experimental_data(self):
         """
@@ -16,13 +19,15 @@ class DataLoader:
         combined_data = []
         
         if not os.path.exists(self.data_dir):
-            print(f"[WARN] Data directory '{self.data_dir}' not found. Using synthetic data only.")
-            return None
+            os.makedirs(self.data_dir)
+            
+        # Attempt download/discovery via manager
+        self.manager.download_data()
             
         files = [f for f in os.listdir(self.data_dir) if f.endswith('.csv')]
         
         if not files:
-            print(f"[WARN] No CSV files found in '{self.data_dir}'. Using synthetic data only.")
+            print(f"[INFO] No experimental CSV files found in '{self.data_dir}'. Will generate synthetic data.")
             return None
             
         print(f"Found {len(files)} experimental datasets: {files}")

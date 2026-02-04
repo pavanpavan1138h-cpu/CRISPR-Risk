@@ -1,0 +1,1 @@
+{"roc_auc": 0.9838372409142074, "pr_auc": 0.9897218461977143, "brier": 0.02795416320417745, "accuracy": 0.9689, "n_samples": 50000, "source": "High-Fidelity Synthetic (50k samples)"}

@@ -4,3 +4,6 @@ scikit-learn
 numpy
 biopython
 pandas
+matplotlib
+seaborn
+imbalanced-learn

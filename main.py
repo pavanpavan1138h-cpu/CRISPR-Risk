@@ -43,7 +43,16 @@ async def predict(request: PredictionRequest):
         # 2. Calculate BRS for each off-target
         enriched_results = []
         for site in off_targets:
-            risk_data = calculate_brs(site["off_target_prob"])
+            # Extract bio features that were put into the result by the model
+            bio_features = {
+                "gene_essentiality": site.get("gene_essentiality", 0),
+                "chromatin_accessibility": site.get("chromatin_accessibility", 0),
+                "functional_region": site.get("functional_region", 0),
+                "tss_distance": site.get("tss_distance", 0),
+                "disease_association": site.get("disease_association", 0)
+            }
+            
+            risk_data = calculate_brs(site["off_target_prob"], bio_features)
             
             # Merge dicts
             result_item = {**site, **risk_data}
@@ -68,4 +77,4 @@ if not os.path.exists(static_dir):
 app.mount("/", StaticFiles(directory=static_dir, html=True), name="static")
 
 if __name__ == "__main__":
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    uvicorn.run(app, host="0.0.0.0", port=8081)

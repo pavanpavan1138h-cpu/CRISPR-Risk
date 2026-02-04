@@ -97,6 +97,46 @@
                 </div>
             </section>
 
+            <!-- 1.5 MODEL PERFORMANCE SECTION -->
+            <section id="performance-section" class="fade-in">
+                <div class="glass-panel" style="margin-top: 2rem;">
+                    <h2 class="section-title"><i class="fas fa-chart-line"></i> Model Training Verification</h2>
+                    <div class="row" style="display: flex; gap: 20px; flex-wrap: wrap;">
+                        <div class="col-md-6" style="flex: 1; min-width: 300px;">
+                            <h4 style="margin-bottom: 10px;">Training Proof</h4>
+                            <p class="text-muted" style="font-size: 0.9em; margin-bottom: 15px;">
+                                Visual evidence of model convergence and performance on the validation dataset.
+                            </p>
+                            <img src="/static/training_plot.png" id="training-plot-img"
+                                style="width: 100%; border-radius: 10px; border: 1px solid rgba(255,255,255,0.2);"
+                                alt="Training Performance Plot"
+                                onerror="this.onerror=null;this.parentElement.innerHTML='<div style=\'padding:20px; background:rgba(0,0,0,0.2); border-radius:10px;\'>Training in progress... Plot will appear after model initializes.</div>';">
+                            <script>
+                                // Cache buster for training plot
+                                document.getElementById('training-plot-img').src = "/static/training_plot.png?t=" + new Date().getTime();
+                            </script>
+                        </div>
+                        <div class="col-md-6" style="flex: 1; min-width: 300px;">
+                            <h4 style="margin-bottom: 10px;">Live Metrics</h4>
+                            <ul class="feature-list" id="model-stats" style="list-style: none; padding: 0;">
+                                <li
+                                    style="background: rgba(255,255,255,0.05); padding: 10px; margin-bottom: 5px; border-radius: 5px; display: flex; justify-content: space-between;">
+                                    <span>Status</span>
+                                    <span style="color: #4CAF50; font-weight: bold;">Active</span>
+                                </li>
+                                <li style="padding: 10px; color: #aaa;">Loading realtime stats...</li>
+                            </ul>
+                            <div
+                                style="margin-top: 15px; padding: 10px; background: rgba(0,100,255,0.1); border-radius: 5px; font-size: 0.85em; border-left: 3px solid #0064ff;">
+                                <strong>System Note:</strong> The model uses an ensemble of Random Forest, Gradient
+                                Boosting, and MLP Neural Networks trained on biology-aware synthetic data (or loaded
+                                experimental datasets).
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
             <!-- 3. LOADING -->
             <div id="loading" class="hidden">
                 <div class="loader"></div>
@@ -163,6 +203,39 @@
             <p>CRISPR Biosafety Risk Assessor | Academic Research Demo</p>
         </footer>
     </div>
+    <script>
+        // Load Model Stats
+        window.addEventListener('DOMContentLoaded', () => {
+            fetch('/static/model_info.json?t=' + new Date().getTime())
+                .then(response => response.json())
+                .then(data => {
+                    const statsList = document.getElementById('model-stats');
+                    statsList.innerHTML = `
+                        <li style="background: rgba(255,255,255,0.05); padding: 10px; margin-bottom: 5px; border-radius: 5px; display: flex; justify-content: space-between;">
+                            <span>Samples Trained</span>
+                            <span style="font-weight: bold;">${data.n_samples.toLocaleString()}</span>
+                        </li>
+                        <li style="background: rgba(255,255,255,0.05); padding: 10px; margin-bottom: 5px; border-radius: 5px; display: flex; justify-content: space-between;">
+                            <span>Accuracy (Val)</span>
+                            <span style="color: #4CAF50; font-weight: bold;">${(data.accuracy * 100).toFixed(2)}%</span>
+                        </li>
+                        <li style="background: rgba(255,255,255,0.05); padding: 10px; margin-bottom: 5px; border-radius: 5px; display: flex; justify-content: space-between;">
+                            <span>ROC-AUC</span>
+                            <span style="color: #2196F3; font-weight: bold;">${data.roc_auc.toFixed(4)}</span>
+                        </li>
+                        <li style="background: rgba(255,255,255,0.05); padding: 10px; margin-bottom: 5px; border-radius: 5px; display: flex; justify-content: space-between;">
+                            <span>PR-AUC</span>
+                            <span style="color: #9C27B0; font-weight: bold;">${data.pr_auc ? data.pr_auc.toFixed(4) : 'N/A'}</span>
+                        </li>
+                        <li style="background: rgba(255,255,255,0.05); padding: 10px; margin-bottom: 5px; border-radius: 5px; display: flex; justify-content: space-between;">
+                            <span>Calibration (Brier)</span>
+                            <span style="color: #FF9800; font-weight: bold;">${data.brier ? data.brier.toFixed(4) : 'N/A'}</span>
+                        </li>
+                    `;
+                })
+                .catch(err => console.log("Stats not ready yet"));
+        });
+    </script>
     <script src="script.js"></script>
 </body>
 
